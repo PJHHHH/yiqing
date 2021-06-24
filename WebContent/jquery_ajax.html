@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="js/jquery.min.js"></script>
+<script type="text/javascript">
+	function fn1(){
+		//get 异步访问
+		$.get(
+			"/yiqing/ajaxServlet2", //url地址
+			{"name":"zhangsan","age":25}, //请求参数
+			function(data){
+				alert(data.name);
+			},
+			"json"
+		);
+	}
+	function fn2(){
+		//post 异步访问
+		$.post(
+			"/yiqing/ajaxServlet2", //url地址
+			{"name":"zhangsan","age":25}, //请求参数
+			function(data){
+				alert(data.name);
+			},
+			"json"
+		);
+	}
+	function fn3(){
+		//ajax方法 异步访问
+		$.ajax({
+			url:"/yiqing/ajaxServlet2",
+			type:"POST",
+			async:true,
+			data:{"name":"lucy","age":18},
+			success:function(data){
+				alert(data.name);
+			},
+			error:function(){
+				alert("请求失败")；
+			},
+			dataType:"json"
+		});
+	}
+</script>
+
+</head>
+<body>
+	<input type="button" value="get访问服务器端" onclick="fn1()">
+	<br>
+	<input type="button" value="post访问服务器端" onclick="fn2()">
+	<br>
+	<input type="button" value="ajax方法访问服务器端" onclick="fn3()">
+	<br>
+</body>
+</html>

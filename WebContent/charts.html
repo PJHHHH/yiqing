@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="stylesheet" href="layui/css/layui.css">
+<script src="js/echarts.min.js"></script>
+<script src="js/jquery.min.js"></script>
+<style>
+			#top {
+				width: auto;
+				height: 30px;
+				text-align: center;
+				margin: auto;
+				padding-top: 5px;
+				background-color: gray;
+			}
+		</style>
+</head>
+<body onload="getLatestDate()">
+
+	<div id="top">
+			<span id="span1"></span>&nbsp;最新疫情信息：<button>查询</button>
+	</div>
+	
+	<div id="main" style="width: 100%;height:550px;overflow: auto;"></div>
+	<script type="text/javascript">
+		var myChart = echarts.init(document.getElementById('main'));
+		var names=[];
+	    var nums=[];
+    	$(".head").empty();
+    	$(".main").empty();
+    	$.ajax({
+            url: "/yiqing/get_charts_data",
+            type: 'post',
+            async:false, 
+            data: {
+                status: status
+            },
+            success: function (data) {
+                names = data.names;
+                datas = data.datas;
+                for(var i=0;i<data.names.length;i++){
+                	var json = {};
+                	json['value'] = datas[i];
+                	json['name'] = names[i];
+                	jsons[i]=json;
+                }
+            },
+            dataType: "json"
+        });
+           $.post(
+               'http://localhost:8086/yiqing/get_charts_data',
+               function(msg){
+                   var json=JSON.parse(msg);
+                   var size=json.length;
+                   for(i=0;i<size;i++){
+                       names.push(json[i].name);
+                       nums.push(parseInt(json[i].confirm));
+                   }
+               
+                   var option = {
+                           title: {
+                               text: currentdate+'确诊人数'
+                           },
+                           tooltip: {},
+                           legend: {
+                               data:['确诊人数']
+                           },
+                           grid: {  
+                               y2: 150  
+                           },
+                           xAxis: {
+                           	type : 'category',
+                               data: names,
+                               axisLabel:{  
+                                   interval:0,
+                                   margin:20,
+                                   show:true,
+                                   textStyle: {
+                                       fontSize:9      //更改坐标轴文字大小
+                                     },
+                                   formatter: function (value) {
+                                       //x轴的文字改为竖版显示
+                                       var str = value.split("");
+                                       return str.join("\n");
+                                     }
+                                  }
+                           },
+                           yAxis: {},
+                           series: [{
+                               name: '确诊人数',
+                               type: 'bar',
+                               data: nums
+                           }]
+                       };
+                   myChart.setOption(option);
+                   tr="<tr><th>省份</th><th>确诊人数</th><th>疑似人数</th><th>治愈人数</th><th>死亡人数</th><th>重症人数</th><th>编码</th><th>更新时间</th></tr>";
+                   $('.head').append(tr);
+                   for(i=0;i<size;i++)
+                       $('.main').append("<tr></tr>");
+                   $('.main tr').each(function(i){
+                       $(this).append("<td>"+json[i].name+"</td>");
+                       $(this).append("<td>"+json[i].confirm+"</td>");
+                       $(this).append("<td>"+json[i].suspect+"</td>");
+                       $(this).append("<td>"+json[i].heal+"</td>");
+                       $(this).append("<td>"+json[i].dead+"</td>");
+                       $(this).append("<td>"+json[i].severe+"</td>")
+                       $(this).append("<td>"+json[i].idcode+"</td>");
+                       $(this).append("<td>"+json[i].lastupdatetime+"</td>");
+                   })
+               }
+               
+           )
+	</script>
+	<table class="layui-table">
+		<thead class="head">
+        </thead>
+        <tbody class="main"></tbody>
+	</table>
+</body>
+</html>
